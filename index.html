@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Pasante — ¿llegás al despacho?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0a0a;
+    --bg-panel: #151515;
+    --bg-card: #1c1c1c80;
+    --ink: #ffffff;
+    --ink-dim: #8c8c8c;
+    --gold: #ffffff;
+    --gold-dim: #5c5c5c;
+    --red: #c0503f;
+    --green: #eaeaea;
+    --line: #2c2c2c;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;}
+  #root{max-width:640px;margin:0 auto;min-height:100vh;padding:24px 20px 60px;display:flex;flex-direction:column;}
+
+  .eyebrow{font-family:'Inter',sans-serif;font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+  .stripes{display:inline-flex;gap:2px;}
+  .stripes span{width:3px;height:12px;background:var(--ink);display:block;transform:skewX(-14deg);}
+  .stripes span:nth-child(2){height:16px;}
+  .stripes span:nth-child(3){height:20px;}
+  h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:30px;line-height:1.1;margin:0 0 4px;text-transform:uppercase;letter-spacing:.01em;}
+  .sub{color:var(--ink-dim);font-size:14px;margin-bottom:20px;}
+
+  /* ----- ID CARD ----- */
+  .idcard{
+    background:linear-gradient(160deg,#1a1a1a,#0e0e0e);
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:16px 18px;
+    margin-bottom:22px;
+    position:relative;
+    overflow:hidden;
+  }
+  .idcard::before{
+    content:"";
+    position:absolute; top:-40px; right:-40px;
+    width:140px;height:140px;border-radius:50%;
+    background:radial-gradient(circle, rgba(201,162,39,.14), transparent 70%);
+  }
+  .idcard-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;}
+  .idcard-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:18px;text-transform:uppercase;}
+  .idcard-role{font-family:'Inter',sans-serif;font-weight:600;font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;}
+  .stat{display:flex;flex-direction:column;gap:4px;}
+  .stat-label{font-size:11px;color:var(--ink-dim);display:flex;justify-content:space-between;font-family:'Inter',sans-serif;font-weight:600;letter-spacing:.03em;text-transform:uppercase;}
+  .bar{height:6px;border-radius:3px;background:#2a3040;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:3px;transition:width .5s ease;}
+  .f-desempeno{background:#ffffff;}
+  .f-reputacion{background:#cfcfcf;}
+  .f-red{background:#a0a0a0;}
+  .f-energia{background:#707070;}
+  .idcard-foot{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);display:flex;justify-content:center;font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-dim);}
+
+  /* ----- CARD / SCENARIO ----- */
+  .scenario{background:var(--bg-panel);border:1px solid var(--line);border-radius:2px;padding:22px;flex:1;display:flex;flex-direction:column;}
+  .scenario-tag{font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;}
+  .scenario h2{font-family:'Oswald',sans-serif;font-weight:600;font-size:21px;margin:0 0 10px;line-height:1.2;text-transform:uppercase;}
+  .scenario p{color:#c7cbd6;font-size:14.5px;line-height:1.55;margin:0 0 20px;}
+
+  .choices{display:flex;flex-direction:column;gap:10px;margin-top:auto;}
+  .choice{
+    text-align:left;
+    background:#1c1c1c;
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:13px 15px;
+    border-radius:2px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+    transition:border-color .15s, transform .1s, background .15s;
+  }
+  .choice:hover{border-color:var(--gold-dim);background:#232323;}
+  .choice:active{transform:scale(.985);}
+  .choice .tag{display:block;font-family:'Inter',sans-serif;font-weight:700;font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+
+  /* start / end screens */
+  .center-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px;padding:20px 0;}
+  .btn-primary{
+    background:var(--gold);color:#0a0a0a;border:none;padding:14px 30px;border-radius:2px;
+    font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;
+  }
+  .btn-primary:hover{background:#d6d6d6;}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink-dim);padding:10px 20px;border-radius:2px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;}
+  .btn-ghost:hover{border-color:var(--gold-dim);color:var(--ink);}
+
+  .plaque{
+    border:1px solid var(--line);
+    background:linear-gradient(180deg,#1a1a1a,#0f0f0f);
+    border-radius:2px;padding:28px 22px;width:100%;
+    position:relative;
+  }
+  .plaque::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:repeating-linear-gradient(100deg, #ffffff 0 8px, transparent 8px 14px);}
+  .plaque .eyebrow{color:var(--gold);}
+  .plaque h2{font-family:'Oswald',sans-serif;font-weight:700;font-size:24px;margin:6px 0 10px;color:#ffffff;text-transform:uppercase;}
+  .plaque p{color:#c9c9c9;font-size:14.5px;line-height:1.6;}
+
+  .fail-plaque{border-color:#3a2c2a;}
+  .fail-plaque::before{background:repeating-linear-gradient(100deg, #c0503f 0 8px, transparent 8px 14px);}
+  .fail-plaque h2{color:#e3a294;}
+  .fail-plaque p{color:#c9b3ae;}
+
+  .event-flash{
+    font-family:'Inter',sans-serif;font-weight:600;font-size:12.5px;
+    background:#1a1a1a;border:1px solid var(--line);border-left:3px solid var(--gold);color:#e5e5e5;
+    padding:10px 12px;border-radius:2px;margin-bottom:16px;
+    animation:fadein .3s ease;
+  }
+  @keyframes fadein{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+
+  .round-count{font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-dim);margin-bottom:10px;}
+
+  a.reset-link{color:var(--ink-dim);font-size:12px;text-decoration:underline;cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+const root = document.getElementById('root');
+
+// ---------- REPORTE DE RESULTADOS ----------
+const RESULTS_ENDPOINT = "https://script.google.com/macros/s/AKfycbwQQKku8p7eEIh1Jt8vVl3_OTAUZTXeM_b4LL_2eLbbRT9vd6NaruwGi9fmLwtoPNG6vw/exec";
+let playerName = "";
+let resultadoEnviado = false;
+
+function enviarResultado(e){
+  if(resultadoEnviado || !RESULTS_ENDPOINT) return;
+  resultadoEnviado = true;
+  const payload = {
+    nombre: (playerName || "").trim() || "Anónimo",
+    final: e.title,
+    ronda: s.ronda,
+    desempeno: s.desempeno,
+    reputacion: s.reputacion,
+    red: s.red,
+    energia: s.energia
+  };
+  try{
+    fetch(RESULTS_ENDPOINT, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify(payload)
+    }).catch(function(){});
+  }catch(err){}
+}
+
+// ---------- DATA ----------
+const RONDA_NIVEL = ["Trainee","Analista Jr.","Analista Jr.","Analista Sr.","Analista Sr.","HRBP","HRBP","Sr. Manager","Sr. Manager","Director"];
+
+const START = {desempeno:50, reputacion:50, red:40, energia:70, ronda:0, nivel:0, gameOver:false};
+
+// Cada escenario: tag, titulo, texto, choices[{tag,label,delta,evento(opcional)}]
+const ESCENARIOS = [
+{
+  tag:"Día 1",
+  h:"La primera decisión de carrera",
+  p:"Entrás como Trainee a una multinacional. Tu líder te da a elegir cómo empezar: en el área especialista o rotando por distintos equipos.",
+  choices:[
+    {label:"Pedís quedarte fijo en HRMs, para especializarte rápido.", tag:"Foco", delta:{desempeno:6, red:-2, energia:-2}},
+    {label:"Pedís el programa de rotación, aunque implique arrancar de cero cada vez.", tag:"Exploración", delta:{red:8, desempeno:-2, energia:-4}},
+    {label:"Te ofrecés como mano derecha de la HR Sr. Director, full exposición.", tag:"Riesgo alto", delta:{reputacion:6, energia:-6, red:4}}
+  ]
+},
+{
+  tag:"Año 1",
+  h:"El primer feedback duro",
+  p:"Tu line manager te sienta y te dice, sin filtro, que en las reuniones con gerentes de negocio te falta carácter. Vos sentís que fue injusta.",
+  choices:[
+    {label:"Lo tomás en silencio y trabajás en el punto sin decir nada.", tag:"Bajás la cabeza", delta:{desempeno:5, energia:-3}},
+    {label:"Le pedís ejemplos concretos y armás un plan en conjunto.", tag:"Diálogo directo", delta:{desempeno:4, reputacion:3, red:2}},
+    {label:"Le contestás que el problema es que no te da lugar para hablar.", tag:"Confrontás", delta:{reputacion:-4, red:-2, energia:2}}
+  ]
+},
+{
+  tag:"Piso de tienda",
+  h:"Pelea en el depósito",
+  p:"Te llaman de urgencia: dos empleados de depósito de una tienda se pelearon con golpes de puño en medio del turno. Hay testigos, mercadería tirada y un gerente de tienda que no sabe cómo seguir.",
+  choices:[
+    {label:"Viajás vos misma a la tienda para gestionar la crisis en persona.", tag:"Vas al lugar", delta:{reputacion:6, red:4, energia:-8}},
+    {label:"Coordinás todo por teléfono con el gerente de tienda, protocolo paso a paso.", tag:"Gestión remota", delta:{desempeno:5, energia:-3, red:-2}},
+    {label:"Aplicás la misma sanción a los dos, sin abrir investigación, para cerrar el tema rápido.", tag:"Mano dura pareja", delta:{desempeno:3, reputacion:-4, red:-3}, evento:"Semanas después se sabe que uno de los dos venía siendo hostigado por el otro. La decisión rápida te vuelve como boomerang."}
+  ]
+},
+{
+  tag:"Año 3",
+  h:"Te llama un headhunter",
+  p:"Estas hace 3 años en la organización y un headhunter te ofrece dar el salto a otra compañía, mismo nivel, 30% más de salario. Tu líder actual no sabe nada todavía.",
+  choices:[
+    {label:"Aceptás y avisás con la formalidad justa.", tag:"Te vas", delta:{red:4, reputacion:-2}, forceEnding:"layoff"},
+    {label:"Usás la oferta para negociar quedarte en mejores condiciones.", tag:"Negociás", delta:{reputacion:2, energia:-3}},
+    {label:"La rechazás sin decir nada, todavía no es tu momento.", tag:"Te quedás", delta:{energia:2, red:-2}}
+  ]
+},
+{
+  tag:"Año 4",
+  h:"El proyecto que se cae",
+  p:"Liderás la implementación de una nueva escala salarial. Se filtra antes de tiempo y genera ruido en toda la compañía. El GM y la VP quieren explicaciones.",
+  choices:[
+    {label:"Asumís el error de comunicación de punta a punta.", tag:"Ponés el pecho", delta:{reputacion:5, energia:-6}},
+    {label:"Explicás el contexto real: la filtración no fue tuya, fue de Sistemas.", tag:"Contexto técnico", delta:{reputacion:2, red:-2}},
+    {label:"Delegás la explicación en tu analista, vos seguís en otra reunión.", tag:"Delegás", delta:{reputacion:-5, red:-3}}
+  ]
+},
+{
+  tag:"Comité de dirección",
+  h:"El pedido de las 8 AM",
+  p:"Pablo Lamo, el Gerente General, te escribe un domingo a la noche: necesita un análisis completo de rotación y headcount por área para el comité de las 8 AM del lunes. Vos tenías el fin de semana cerrado con tu familia.",
+  choices:[
+    {label:"Te sentás esa misma noche y lo tenés listo a primera hora.", tag:"Lo priorizás todo", delta:{reputacion:6, energia:-9}},
+    {label:"Le mandás lo que tenés armado y avisás que el detalle fino lo sumás el lunes a media mañana.", tag:"Versión parcial a tiempo", delta:{reputacion:2, red:3, energia:-3}},
+    {label:"Le contestás el lunes a primera hora, explicando que necesitás el día para hacerlo bien.", tag:"Pedís el día", delta:{reputacion:-5, energia:3, red:-2}, evento:"En el comité, Pablo menciona en voz alta que 'RRHH todavía no tiene esos números'. Lo escuchan todos."}
+  ]
+},
+{
+  tag:"Año 5",
+  h:"Te ofrecen el ascenso a Manager",
+  p:"Es tu primer equipo a cargo: tres personas. Tenés que decidir qué tipo de líder vas a ser desde el día uno.",
+  choices:[
+    {label:"Priorizás resultados: metas claras, cero excusas.", tag:"Orientada a resultado", delta:{desempeno:6, red:-3, energia:-2}},
+    {label:"Priorizás a las personas: primero el vínculo, después el número.", tag:"Orientada a la gente", delta:{red:6, desempeno:-2, energia:2}, evento:"Los resultados del equipo no llegan a lo esperado. Tu jefe te da un heads up: hay que revertirlo pronto."},
+    {label:"Buscás el equilibrio, aunque tarde más en mostrar resultados.", tag:"Equilibrio", delta:{desempeno:2, red:2, energia:-2}}
+  ]
+},
+{
+  tag:"Año 6",
+  h:"Una decisión que no te cierra",
+  p:"Tu directora te pide desvincular a alguien de tu equipo para cubrir el error de otra gerencia. Vos sabés que no es justo.",
+  choices:[
+    {label:"Ejecutás la orden, es la líder y confiás en que sabe lo que hace.", tag:"Obedecés", delta:{reputacion:2, red:-6, energia:-6}},
+    {label:"Plantás postura y pedís que busquen otra alternativa.", tag:"Te plantás", delta:{reputacion:-3, red:5, energia:-4}, evento:"Ganás el respeto de tu equipo. Tu director no lo olvida."},
+    {label:"Buscás un camino intermedio: reubicar a la persona en otra área.", tag:"Buscás la vuelta", delta:{red:4, desempeno:2, energia:-5}}
+  ]
+},
+{
+  tag:"Año 8",
+  h:"Conflicto con el sindicato",
+  p:"El sindicato de comercio convoca un paro sorpresa en varias tiendas por un reclamo salarial. Los gerentes de zona te llaman sin parar pidiendo instrucciones, y arriba te piden que la cosa no escale.",
+  choices:[
+    {label:"Vas vos misma a negociar cara a cara con los delegados sindicales.", tag:"Negociás en persona", delta:{reputacion:6, red:3, energia:-8}},
+    {label:"Dejás que Legal lleve la negociación y vos coordinás la logística puertas adentro.", tag:"Delegás a Legal", delta:{desempeno:4, red:-2, energia:-3}},
+    {label:"Aplicás mano dura: apercibimiento para quien se sume al paro.", tag:"Mano dura", delta:{desempeno:2, reputacion:-5, red:-6}, evento:"El paro se extiende a más tiendas por solidaridad. La foto te sale cara."}
+  ]
+},
+{
+  tag:"Año 9",
+  h:"La última bifurcación",
+  p:"Te ofrecen ser Chief People Officer en otra empresa, más chica pero con equity real. Acá tenés estabilidad y un techo casi de cristal.",
+  choices:[
+    {label:"Das el salto a CHRO afuera, con todo el riesgo que implica.", tag:"Salto al vacío", delta:{reputacion:6, energia:-4, red:2}},
+    {label:"Te quedás a pelear el puesto interno, aunque tarde más años.", tag:"Jugás local", delta:{red:5, desempeno:3, energia:-2}},
+    {label:"Dejás el corporate y armás tu propia consultora HR.", tag:"Independiente", delta:{red:8, desempeno:-2, reputacion:3, energia:3}}
+  ]
+}
+];
+
+let s = {...START};
+let history = [];
+
+function clamp(n){return Math.max(0, Math.min(100, n));}
+
+function nivelActual(){
+  const idx = Math.min(RONDA_NIVEL.length-1, s.ronda);
+  return RONDA_NIVEL[idx];
+}
+
+function statBar(label, key, color){
+  return `<div class="stat">
+    <div class="stat-label"><span>${label}</span><span>${s[key]}</span></div>
+    <div class="bar"><div class="bar-fill f-${color}" style="width:${s[key]}%"></div></div>
+  </div>`;
+}
+
+function renderIdCard(flashMsg){
+  return `
+  <div class="idcard">
+    <div class="idcard-top">
+      <div>
+        <div class="idcard-name">Tu legajo</div>
+        <div class="idcard-role">${nivelActual()}</div>
+      </div>
+    </div>
+    <div class="stats">
+      ${statBar("Desempeño","desempeno","desempeno")}
+      ${statBar("Reputación","reputacion","reputacion")}
+      ${statBar("Red","red","red")}
+      ${statBar("Energía","energia","energia")}
+    </div>
+    <div class="idcard-foot">
+      <span>Ronda ${s.ronda} / ${ESCENARIOS.length}</span>
+    </div>
+  </div>
+  ${flashMsg ? `<div class="event-flash">→ ${flashMsg}</div>` : ""}
+  `;
+}
+
+function checkGameOver(){
+  if(s.energia <= 0) return "quemado";
+  if(s.reputacion <= 5) return "despedido";
+  return null;
+}
+
+function applyChoice(delta, evento, forceEnding){
+  for(const k in delta){
+    s[k] = clamp(s[k] + delta[k]);
+  }
+  if(forceEnding){ renderEnding(forceEnding, evento); return; }
+  s.ronda += 1;
+  render(evento);
+}
+
+function render(flashMsg){
+  const over = checkGameOver();
+  if(over){ renderEnding(over); return; }
+  if(s.ronda >= ESCENARIOS.length){ renderEnding("final"); return; }
+
+  const esc = ESCENARIOS[s.ronda];
+  root.innerHTML = `
+    <div class="eyebrow"><span class="stripes"><span></span><span></span><span></span></span>El Pasante</div>
+    <h1>¿Llegás a la oficina del Piso 3?</h1>
+    <div class="sub">Modo carrera en 5 minutos. Empezás a los 22 como Trainee.</div>
+    ${renderIdCard(flashMsg)}
+    <div class="scenario">
+      <div class="scenario-tag">${esc.tag}</div>
+      <h2>${esc.h}</h2>
+      <p>${esc.p}</p>
+      <div class="choices">
+        ${esc.choices.map((c,i)=>`
+          <button class="choice" data-idx="${i}">
+            <span class="tag">${c.tag}</span>
+            ${c.label}
+          </button>`).join("")}
+      </div>
+    </div>
+  `;
+  root.querySelectorAll(".choice").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const idx = parseInt(btn.getAttribute("data-idx"));
+      const c = esc.choices[idx];
+      applyChoice(c.delta, c.evento, c.forceEnding);
+    });
+  });
+}
+
+function endingContent(kind){
+  const score = (s.desempeno*0.3 + s.reputacion*0.3 + s.red*0.2 + s.energia*0.2);
+  if(kind === "layoff"){
+    return {fail:true, title:"Massive layoff. Quedás afuera.",
+      text:"Te fuiste con todo para arrancar de nuevo en otra compañía. Al año siguiente, esa empresa hace un massive layoff y tu puesto es de los primeros en caer. Legajo cerrado antes de tiempo."};
+  }
+  if(kind === "quemado"){
+    return {fail:true, title:"Burnout. Te bajás del barco.",
+      text:"La energía llegó a cero antes de llegar a ningún lado. Pediste licencia, y cuando quisiste volver, ya no había vuelta atrás que valiera la pena. El desk del piso 3 sigue ahí, con otro nombre."};
+  }
+  if(kind === "despedido"){
+    return {fail:true, title:"Te desvinculan.",
+      text:"La reputación cayó tanto que ya nadie te bancaba en el FLM. Un viernes a las 17 hs., te llaman de una sala que no era la tuya. Legajo cerrado."};
+  }
+  // final por rondas completas
+  if(score >= 72 && s.reputacion >= 60 && s.red >= 55){
+    return {fail:false, title:"CHRO. Llegaste al desk del piso 3!!",
+      text:"Diez años, un legajo entero de decisiones incómodas, y ahora la puerta con tu nombre. No fue un golpe de suerte: fue cada vez que plantaste postura cuando era más fácil callarte. Sos la referencia que el próximo trainee va a mirar de afuera."};
+  }
+  if(score >= 55){
+    return {fail:false, title:"Director/a sólido/a, sin la estatua.",
+      text:"Construiste una carrera prolija, con equipo propio y respeto genuino. El piso 3 nunca terminó de abrirse, pero tampoco lo necesitaste tanto como pensabas al principio."};
+  }
+  if(s.red >= 65 && score >= 45){
+    return {fail:false, title:"Dejaste la corpo. Armaste tu consultora.",
+      text:"En algún punto entendiste que el título ya no era la meta. Ahora facturás distinto, elegís con quién trabajar, y tu red de diez años es tu mejor activo."};
+  }
+  return {fail:true, title:"Meseta. Te quedaste en el medio.",
+    text:"Ni el batacazo ni el quiebre. Diez años en la misma banda de puestos, mirando cómo otros con menos mérito daban el salto por estar en el lugar justo en el momento justo."};
+}
+
+function renderEnding(kind){
+  const e = endingContent(kind);
+  enviarResultado(e);
+  root.innerHTML = `
+    <div class="eyebrow"><span class="stripes"><span></span><span></span><span></span></span>El Pasante</div>
+    <h1>Fin de la partida</h1>
+    <div class="center-screen">
+      ${renderIdCard()}
+      <div class="plaque ${e.fail ? 'fail-plaque':''}">
+        <div class="eyebrow">${e.fail ? 'Cierre de legajo' : 'Placa de reconocimiento'}</div>
+        <h2>${e.title}</h2>
+        <p>${e.text}</p>
+      </div>
+      <button class="btn-primary" id="retry">Jugar de nuevo</button>
+    </div>
+  `;
+  document.getElementById("retry").addEventListener("click", ()=>{
+    resultadoEnviado = false;
+    s = {...START};
+    renderStart();
+  });
+}
+
+function renderStart(){
+  root.innerHTML = `
+    <div class="eyebrow"><span class="stripes"><span></span><span></span><span></span></span>El Pasante</div>
+    <h1>¿Llegás a la oficina del Piso 3?</h1>
+    <div class="sub">Un modo carrera de 5 minutos, pero en RRHH corporativo. Empezás a los 22, Trainee, cuatro stats y diez decisiones que no se perdonan.</div>
+    <div class="center-screen">
+      <div class="idcard" style="width:100%;">
+        <div class="idcard-top">
+          <div>
+            <div class="idcard-name">Cómo se juega</div>
+            <div class="idcard-role">Instrucciones</div>
+          </div>
+        </div>
+        <p style="color:#c7cbd6;font-size:13.5px;line-height:1.6;margin:0;">
+          Cada ronda es una decisión de carrera real: un feedback, una reestructuración, una oferta, un dilema ético.
+          Tus elecciones mueven cuatro variables: <b>Desempeño</b>, <b>Reputación</b>, <b>Red</b> y <b>Energía</b>.
+          Si la energía llega a cero, hay burnout. Si la reputación se hunde, te desvinculan.
+          Si llegás entero a la ronda 10, tu legajo define en qué terminaste.
+        </p>
+      </div>
+      <input id="playerName" type="text" maxlength="40" placeholder="Tu nombre o apodo" value="${playerName.replace(/"/g, '&quot;')}"
+        style="width:100%;max-width:320px;background:#1c1c1c;border:1px solid var(--line);border-radius:2px;color:var(--ink);
+               font-family:'Inter',sans-serif;font-size:14px;padding:12px 14px;text-align:center;">
+      <button class="btn-primary" id="start">Llegás a la sala Training</button>
+    </div>
+  `;
+  document.getElementById("start").addEventListener("click", ()=>{
+    playerName = document.getElementById("playerName").value || "";
+    resultadoEnviado = false;
+    s = {...START};
+    render();
+  });
+}
+
+renderStart();
+</script>
+</body>
+</html>
